@@ -82,7 +82,7 @@ function setup() {
   ship = makeShip(random(width), random(height))
   
   var mqttURL = 'wss://mqtt.flespi.io'
-  client = mqtt.connect(mqttURL, { username:'LeBBWouscvsCtBqjCS4Monz9wqZJKDEjI5Jsj3Lkp1KIs0PTGJvUVSRh9FQH8kPE'})
+  client = mqtt.connect(mqttURL, { username:''})
   client.on('connect', ()=>{
     initialMsg()
     client.subscribe('messages')
