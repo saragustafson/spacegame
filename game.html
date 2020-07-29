@@ -13,13 +13,11 @@
 
 /* START JAVASCRIPT */ 
 
-var starsX = []
-var starsY = []
+var stars = [];
 var ship;
 var shipImage;
 var lasers;
 var laserImage;
-var ws;
 var players = []
 var enemyLasers;
 var uid;
@@ -68,8 +66,7 @@ function setup() {
 
   stroke(255)
   for(var i=0; i<1000; i++) {
-    starsX[i] = random(width)
-    starsY[i] = random(height)
+    stars[i] = [random(width), random(height)]
   }
 
   shipImage = loadImage(pic)
@@ -98,7 +95,7 @@ function setup() {
 function draw() {
   background(0)
   for(var i=0; i<1000; i++){
-    point(starsX[i], starsY[i])
+    point(stars[i][0], stars[i][1])
   }
   
   if(controls) controls()
