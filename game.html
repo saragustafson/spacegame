@@ -26,48 +26,11 @@ var button;
 var client;
 var token;
 
-function controls(){
-  if(keyDown(LEFT_ARROW) || keyDown('a')){
-    ship.rotation -= 4
-    send({
-      mode: 'turn',
-      angle: -4
-    })
-  }
-  if(keyDown(RIGHT_ARROW) || keyDown('d')){
-    ship.rotation += 4 
-    send({
-      mode: 'turn',
-      angle: 4
-    })
-  }
-  if(keyDown(UP_ARROW) || keyDown('w')){
-    ship.addSpeed(0.2, ship.rotation - 90)
-    send({
-      mode: 'fly',
-    })
-  }
-  if(keyWentDown(32)){ // 32 is for spacebar
-    var x = ship.position.x
-    var y = ship.position.y
-    var r = ship.rotation
-    fireLaser(x,y,r,lasers)
-    send({
-      mode: 'fire', x, y, r
-    })
-  }
-}
-
 function setup() {
   uid = randomString()
 
   createCanvas(window.innerWidth, window.innerHeight)
   background(0)
-
-  stroke(255)
-  for(var i=0; i<1000; i++) {
-    stars[i] = [random(width), random(height)]
-  }
 
   shipImage = loadImage(pic)
   laserImage = loadImage(bullet)
@@ -93,12 +56,8 @@ function setup() {
 } // end setup function
 
 function draw() {
-  background(0)
-  for(var i=0; i<1000; i++){
-    point(stars[i][0], stars[i][1])
-  }
   
-  if(controls) controls()
+  if(typeof controls==='function') controls()
 
   for(var i=0; i<allSprites.length; i++){
     var sprite = allSprites[i]
@@ -122,7 +81,6 @@ function shipHit(){
   })
   dead = true
   button.show()
-  // window.setTimeout(function(){ noLoop() }, 800)
 }
 
 function makeShip(x,y){
