@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/addons/p5.sound.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js" integrity="sha512-WIklPM6qPCIp6d3fSSr90j+1unQHUOoWDS4sdTiR8gxUTnyZ8S2Mr8e10sKKJ/bhJgpAa/qG068RDkg6fIlNFA==" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@code-dot-org/p5.play@1.3.12-cdo/lib/p5.play.js"></script>
-    <script src="https://unpkg.com/mqtt@2.18.8/dist/mqtt.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.1.0/mqtt.min.js" integrity="sha512-sTN92jVVor4KnbCixNIu65V1Ep6JMn7p8EkBGaepVwR6tqTbMuJIUCz0RKliKW6N+aVcg192m62wR/b2GcxdWQ==" crossorigin="anonymous"></script>
     <meta charset="utf-8" />
     <title>Space Game</title>
-    <style>body{margin:0;}</style>
+    <style>body{margin:0;overflow:hidden;}</style>
   </head>
 <body>
 <script>
@@ -28,6 +26,7 @@ var uid;
 var dead;
 var button;
 var client;
+var token;
 
 function controls(){
   if(keyDown(LEFT_ARROW) || keyDown('a')){
@@ -81,19 +80,7 @@ function setup() {
 
   ship = makeShip(random(width), random(height))
   
-  var mqttURL = 'wss://mqtt.flespi.io'
-  client = mqtt.connect(mqttURL, { username:''})
-  client.on('connect', ()=>{
-    initialMsg()
-    client.subscribe('messages')
-    client.on('message', function(t,b){
-      try { 
-        var hi = new TextDecoder("utf-8").decode(b)
-        var yo = JSON.parse(hi)
-        doStuff(yo)
-      } catch(e){}
-    })
-  })
+  if(token) connectToFlespi()
   
   button = createButton('respawn');
   button.position(19, 19);
@@ -170,6 +157,22 @@ function fireLaser(x,y,r,group){
 
 // Websocket stuff
 
+function connectToFlespi(){
+  var mqttURL = 'wss://mqtt.flespi.io'
+  client = mqtt.connect(mqttURL, { username:token})
+  client.on('connect', ()=>{
+    initialMsg()
+    client.subscribe('messages')
+    client.on('message', function(t,b){
+      try { 
+        var hi = new TextDecoder("utf-8").decode(b)
+        var yo = JSON.parse(hi)
+        incomingMessage(yo)
+      } catch(e){}
+    })
+  })
+}
+
 function initialMsg() {
   send({
     mode: 'join',
@@ -185,8 +188,8 @@ function send(m) {
   }
 }
 
-function doStuff(m){
-  if(m.id == uid) return // not for myself
+function incomingMessage(m){
+  if(m.id == uid) return // skip if its from me
 
   if(m.mode=='join'){
     players[m.id] = makeShip(m.x, m.y)
